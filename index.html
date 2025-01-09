@@ -65,9 +65,11 @@
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
   </script>
-  <script async
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDJx85vp1izszfWm46JwX26tkIbw_lE7fI&callback=initMap">
+   <script
+     src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap"
+     loading="lazy">
   </script>
+
 
   <!-- Application Logic -->
   <script type="module" src="script.js"></script>

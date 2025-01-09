@@ -1,136 +1,74 @@
-// Setting up the interactive map and adding functionality for user-contributed markers
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Southern California Fire Map</title>
+  <style>
+    /* Basic styles for the map and controls */
+    #map {
+      height: 90vh; /* Adjust height to your preference */
+      width: 100%;
+    }
+    #controls {
+      padding: 10px;
+      background: white;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      text-align: center;
+    }
+    #formPopup textarea {
+      width: 100%;
+      resize: none;
+    }
+    button {
+      padding: 8px 12px;
+      background: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <button id="addMarkerBtn">Add Missing Info</button>
+  </div>
+  <div id="map"></div>
 
-let map;
-let markers = [];
-let isAddingMarker = false;
-
-// Initialize the Google Map
-function initMap() {
-  map = new google.maps.Map(document.getElementById("map"), {
-    zoom: 8,
-    center: { lat: 34.0522, lng: -118.2437 }, // Southern California coordinates
-  });
-
-  // Add marker button functionality
-  document.getElementById("addMarkerBtn").addEventListener("click", () => {
-    isAddingMarker = true;
-    map.addListener("click", handleMapClick);
-  });
-}
-
-// Handle map clicks to place a marker
-function handleMapClick(event) {
-  if (isAddingMarker) {
-    const marker = new google.maps.Marker({
-      position: event.latLng,
-      map: map,
-      draggable: true,
-    });
-    markers.push(marker);
-    openForm(event.latLng);
-    isAddingMarker = false;
-    google.maps.event.clearListeners(map, 'click');
-  }
-}
-
-// Open a form to collect user information
-function openForm(latLng) {
-  const formHtml = `
-    <div id="formPopup" style="position: absolute; z-index: 1000; background: white; padding: 20px; border-radius: 5px;">
-      <h3>Submit Missing Info</h3>
-      <form id="infoForm">
-        <input type="hidden" id="lat" value="${latLng.lat()}">
-        <input type="hidden" id="lng" value="${latLng.lng()}">
-        <label for="status">Property Status:</label>
-        <select id="status">
-          <option value="safe">Safe</option>
-          <option value="uncertain">Uncertain</option>
-          <option value="affected">Affected</option>
-        </select>
-        <br>
-        <label for="notes">Additional Notes:</label>
-        <textarea id="notes" placeholder="Describe missing people, pets, or property info."></textarea>
-        <br>
-        <button type="submit">Submit</button>
-      </form>
-    </div>
-  `;
-  document.body.insertAdjacentHTML("beforeend", formHtml);
-
-  document.getElementById("infoForm").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const data = {
-      lat: document.getElementById("lat").value,
-      lng: document.getElementById("lng").value,
-      status: document.getElementById("status").value,
-      notes: document.getElementById("notes").value,
+  <!-- Firebase and Google Maps Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.20.0/firebase-database.js"></script>
+  <script>
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.20.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.20.0/firebase-analytics.js";
+    
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDpG5verrbzKiIxFfcbiYG4GaLmRRLXIZ8",
+      authDomain: "firemap-538a6.firebaseapp.com",
+      projectId: "firemap-538a6",
+      storageBucket: "firemap-538a6.appspot.com",
+      messagingSenderId: "303164276549",
+      appId: "1:303164276549:web:5908b3db14be6bcbae882c",
+      measurementId: "G-W2LGWW79MC"
     };
-    saveData(data);
-    document.getElementById("formPopup").remove();
-  });
-}
 
-// Placeholder function to save data
-function saveData(data) {
-  console.log("Data to save:", data);
-  // Here you will integrate with Firebase or another backend
-}
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+  </script>
+  <script async
+    src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap">
+  </script>
 
-// Load markers added by other users (simulate backend fetch)
-function loadUserMarkers() {
-  const sampleData = [
-    { lat: 34.0522, lng: -118.2437, notes: "Missing pet: black Labrador", status: "uncertain" },
-    { lat: 34.05, lng: -118.25, notes: "Property status unknown", status: "affected" },
-  ];
-
-  sampleData.forEach((info) => {
-    const marker = new google.maps.Marker({
-      position: { lat: info.lat, lng: info.lng },
-      map: map,
-      icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png", // Different color for user-submitted markers
-      title: info.notes,
-    });
-
-    const infowindow = new google.maps.InfoWindow({
-      content: `<strong>Status:</strong> ${info.status}<br><strong>Notes:</strong> ${info.notes}`,
-    });
-
-    marker.addListener("click", () => {
-      infowindow.open(map, marker);
-    });
-  });
-}
-
-window.onload = () => {
-  initMap();
-  loadUserMarkers();
-};
-
-<html>
-  <head>
-    <title>Simple Marker</title>
-    <!-- The callback parameter is required, so we use console.debug as a noop -->
-    <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDJx85vp1izszfWm46JwX26tkIbw_lE7fI&callback=console.debug&libraries=maps,marker&v=beta">
-    </script>
-    <style>
-      /* Always set the map height explicitly to define the size of the div
-       * element that contains the map. */
-      gmp-map {
-        height: 100%;
-      }
-
-      /* Optional: Makes the sample page fill the window. */
-      html,
-      body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
-    </style>
-  </head>
-  <body>
-    <gmp-map center="34.05446243286133,-118.53311157226562" zoom="14" map-id="DEMO_MAP_ID">
-      <gmp-advanced-marker position="34.05446243286133,-118.53311157226562" title="My location"></gmp-advanced-marker>
-    </gmp-map>
-  </body>
+  <!-- Application Logic -->
+  <script type="module" src="script.js"></script>
+</body>
 </html>

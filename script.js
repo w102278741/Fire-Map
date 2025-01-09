@@ -16,14 +16,14 @@ const database = firebase.database();
 
 let map;
 
-// Initialize Google Map
+// Define initMap and attach it to the window object
 window.initMap = function () {
   map = new google.maps.Map(document.getElementById("map"), {
-    center: { lat: 34.0522, lng: -118.2437 },
+    center: { lat: 34.0522, lng: -118.2437 }, // Los Angeles coordinates
     zoom: 8,
   });
 
-  loadUserMarkers();
+  loadUserMarkers(); // Load existing markers from Firebase
 };
 
 // Load markers from Firebase
@@ -41,7 +41,5 @@ function loadUserMarkers() {
         });
       }
     }
-  });
-}
   });
 }

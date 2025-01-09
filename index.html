@@ -1,0 +1,107 @@
+// Setting up the interactive map and adding functionality for user-contributed markers
+
+let map;
+let markers = [];
+let isAddingMarker = false;
+
+// Initialize the Google Map
+function initMap() {
+  map = new google.maps.Map(document.getElementById("map"), {
+    zoom: 8,
+    center: { lat: 34.0522, lng: -118.2437 }, // Southern California coordinates
+  });
+
+  // Add marker button functionality
+  document.getElementById("addMarkerBtn").addEventListener("click", () => {
+    isAddingMarker = true;
+    map.addListener("click", handleMapClick);
+  });
+}
+
+// Handle map clicks to place a marker
+function handleMapClick(event) {
+  if (isAddingMarker) {
+    const marker = new google.maps.Marker({
+      position: event.latLng,
+      map: map,
+      draggable: true,
+    });
+    markers.push(marker);
+    openForm(event.latLng);
+    isAddingMarker = false;
+    google.maps.event.clearListeners(map, 'click');
+  }
+}
+
+// Open a form to collect user information
+function openForm(latLng) {
+  const formHtml = `
+    <div id="formPopup" style="position: absolute; z-index: 1000; background: white; padding: 20px; border-radius: 5px;">
+      <h3>Submit Missing Info</h3>
+      <form id="infoForm">
+        <input type="hidden" id="lat" value="${latLng.lat()}">
+        <input type="hidden" id="lng" value="${latLng.lng()}">
+        <label for="status">Property Status:</label>
+        <select id="status">
+          <option value="safe">Safe</option>
+          <option value="uncertain">Uncertain</option>
+          <option value="affected">Affected</option>
+        </select>
+        <br>
+        <label for="notes">Additional Notes:</label>
+        <textarea id="notes" placeholder="Describe missing people, pets, or property info."></textarea>
+        <br>
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+  `;
+  document.body.insertAdjacentHTML("beforeend", formHtml);
+
+  document.getElementById("infoForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const data = {
+      lat: document.getElementById("lat").value,
+      lng: document.getElementById("lng").value,
+      status: document.getElementById("status").value,
+      notes: document.getElementById("notes").value,
+    };
+    saveData(data);
+    document.getElementById("formPopup").remove();
+  });
+}
+
+// Placeholder function to save data
+function saveData(data) {
+  console.log("Data to save:", data);
+  // Here you will integrate with Firebase or another backend
+}
+
+// Load markers added by other users (simulate backend fetch)
+function loadUserMarkers() {
+  const sampleData = [
+    { lat: 34.0522, lng: -118.2437, notes: "Missing pet: black Labrador", status: "uncertain" },
+    { lat: 34.05, lng: -118.25, notes: "Property status unknown", status: "affected" },
+  ];
+
+  sampleData.forEach((info) => {
+    const marker = new google.maps.Marker({
+      position: { lat: info.lat, lng: info.lng },
+      map: map,
+      icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png", // Different color for user-submitted markers
+      title: info.notes,
+    });
+
+    const infowindow = new google.maps.InfoWindow({
+      content: `<strong>Status:</strong> ${info.status}<br><strong>Notes:</strong> ${info.notes}`,
+    });
+
+    marker.addListener("click", () => {
+      infowindow.open(map, marker);
+    });
+  });
+}
+
+window.onload = () => {
+  initMap();
+  loadUserMarkers();
+};

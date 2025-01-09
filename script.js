@@ -2,23 +2,21 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.20.0/firebase-app.js";
 import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/9.20.0/firebase-database.js";
 
-// Firebase configuration
+// Firebase configuration (non-modular version)
 const firebaseConfig = {
   apiKey: "AIzaSyDpG5verrbzKiIxFfcbiYG4GaLmRRLXIZ8",
   authDomain: "firemap-538a6.firebaseapp.com",
-  databaseURL: "https://firemap-538a6-default-rtdb.firebaseio.com/",
+  databaseURL: "https://firemap-538a6.firebaseio.com",
   projectId: "firemap-538a6",
-  storageBucket: "firemap-538a6.firebasestorage.app",
+  storageBucket: "firemap-538a6.appspot.com",
   messagingSenderId: "303164276549",
   appId: "1:303164276549:web:5908b3db14be6bcbae882c",
+  measurementId: "G-W2LGWW79MC"
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
-
-let map;
-let userMarkers = []; // To store markers added by users
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
 
 // Initialize Google Map
 window.initMap = function () {
